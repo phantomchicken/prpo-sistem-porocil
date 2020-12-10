@@ -22,15 +22,18 @@ public class PorociloVir {
 
     @PostConstruct
     private void init() {
-        LocalDateTime v = LocalDateTime.now();
         porocilo = new Porocilo();
-        porocilo.toString();
-        porocilo.addZapis();
+        porocilo.addZapis(1,1);
+        porocilo.addZapis(1,2);
+        porocilo.addZapis(2,1);
+        porocilo.addZapis(1,3);
+        porocilo.addZapis(1,3);
         System.out.println(porocilo.toString());
     }
 
     @GET
     public Response getPorocila (){
+        System.out.println("Y");
         return Response .ok(porocilo).build();
     }
 }

@@ -6,29 +6,31 @@ import java.util.HashMap;
 
 
 public class Porocilo {
-    private HashMap<ProstorVrata,ArrayList<String>> zapisi;
+    private HashMap<Integer,ArrayList<String>> zapisi;
 
     public Porocilo() {
-        this.zapisi = new HashMap<ProstorVrata, ArrayList<String>>();
+        this.zapisi = new HashMap<Integer,ArrayList<String>>();
     }
 
-    public HashMap<ProstorVrata, ArrayList<String>> getZapisi() { return zapisi; }
+    public HashMap<Integer,ArrayList<String>> getZapisi() { return zapisi; }
 
-    public void setZapisi(HashMap<ProstorVrata, ArrayList<String>> zapisi) { this.zapisi = zapisi; }
+    public void setZapisi(HashMap<Integer,ArrayList<String>> zapisi) { this.zapisi = zapisi; }
 
     public String addZapis(int prostorId, int vrataId){
         LocalDateTime cas = LocalDateTime.now();
         StringBuilder sb = new StringBuilder();
-        sb.append(cas.getHour()+":"+cas.getMinute()+" " +cas.getDayOfWeek() + " "+cas.getDayOfMonth()+" "+cas.getMonth()+ " "+cas.getYear());
+
+        sb.append("Vrata: " + vrataId + ", ");
+        int min = cas.getMinute();
+        String minStr = (min > 10) ? Integer.toString(min) : "0"+Integer.toString(min);
+
+        sb.append(cas.getHour()+":"+minStr+" " +cas.getDayOfWeek() + " "+cas.getDayOfMonth()+" "+cas.getMonth()+ " "+cas.getYear());
+
         String noviZapis = sb.toString();
         ArrayList<String> trenutniZapisi = this.zapisi.get(prostorId);
-        if (trenutniZapisi==null) {
-            trenutniZapisi = new ArrayList<String>();
-            trenutniZapisi.add(noviZapis);
-        }
-       ProstorVrata e = new ProstorVrata(prostorId, vrataId);
-        this.zapisi.put(e,trenutniZapisi);
-
+        if (trenutniZapisi==null) trenutniZapisi = new ArrayList<String>();
+        trenutniZapisi.add(noviZapis);
+        this.zapisi.put(prostorId,trenutniZapisi);
         return noviZapis;
     }
 
@@ -36,8 +38,7 @@ public class Porocilo {
     public String toString (){
         if (zapisi==null) return "";
         StringBuilder sb = new StringBuilder();
-        for (ProstorVrata zapis : zapisi.keySet()) {
-            sb.append("Prostor: " + zapis.getProstorId() +" Vrata: " + zapis.getVrataId()+"\n");
+        for (Integer zapis : zapisi.keySet()) {
             sb.append(zapisi.get(zapis));
             sb.append("\n");
         }

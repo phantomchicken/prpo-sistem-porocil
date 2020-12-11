@@ -4,10 +4,7 @@ import si.fri.prpo.skupina19.porocila.api.v1.dtos.Porocilo;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
@@ -23,9 +20,9 @@ public class PorociloVir {
     @PostConstruct
     private void init() {
         porocilo = new Porocilo();
+        porocilo.addZapis(2,1);
         porocilo.addZapis(1,1);
         porocilo.addZapis(1,2);
-        porocilo.addZapis(2,1);
         porocilo.addZapis(1,3);
         porocilo.addZapis(1,3);
         System.out.println(porocilo.toString());
@@ -33,7 +30,22 @@ public class PorociloVir {
 
     @GET
     public Response getPorocila (){
-        System.out.println("Y");
-        return Response .ok(porocilo).build();
+        if (porocilo!=null)
+            return Response .ok(porocilo).build();
+        else
+            return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    @POST
+    public Response createZapis(Integer prostorId, Integer vrataId) {
+        porocilo.addZapis(prostorId,vrataId);
+        if (porocilo == null) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST).build();
+        }
+        return Response
+                .status(Response.Status.CREATED)
+                .entity(porocilo)
+                .build();
     }
 }

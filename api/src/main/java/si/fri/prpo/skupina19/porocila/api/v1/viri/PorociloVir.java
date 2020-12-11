@@ -1,6 +1,7 @@
 package si.fri.prpo.skupina19.porocila.api.v1.viri;
 
 import si.fri.prpo.skupina19.porocila.api.v1.dtos.Porocilo;
+import si.fri.prpo.skupina19.porocila.api.v1.dtos.Zapis;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -20,12 +21,12 @@ public class PorociloVir {
     @PostConstruct
     private void init() {
         porocilo = new Porocilo();
-        porocilo.addZapis(2,1);
-        porocilo.addZapis(1,1);
-        porocilo.addZapis(1,2);
-        porocilo.addZapis(1,3);
-        porocilo.addZapis(1,3);
-        System.out.println(porocilo.toString());
+        porocilo.addZapis(2,1, 5, 1);
+        porocilo.addZapis(1,1,1, 1);
+        porocilo.addZapis(1,2,2, 1);
+        porocilo.addZapis(1,3,3, 1);
+        porocilo.addZapis(1,3,0, 3);
+        //System.out.println(porocilo.toString());
     }
 
     @GET
@@ -37,15 +38,16 @@ public class PorociloVir {
     }
 
     @POST
-    public Response createZapis(Integer prostorId, Integer vrataId) {
-        porocilo.addZapis(prostorId,vrataId);
+    @Path("/{prostorId}/{vrataId}&{stVstopov}&{stIzstopov}")
+    public Response createZapis(@PathParam("prostorId") Integer prostorId, @PathParam("vrataId") Integer vrataId, @PathParam("stVstopov") Integer stVstopov, @PathParam("stIzstopov") Integer stIzstopov) {
+        Zapis noviZapis = porocilo.addZapis(prostorId, vrataId, stVstopov, stIzstopov);
         if (porocilo == null) {
             return Response
                     .status(Response.Status.BAD_REQUEST).build();
         }
         return Response
                 .status(Response.Status.CREATED)
-                .entity(porocilo)
+                .entity(noviZapis)
                 .build();
     }
 }

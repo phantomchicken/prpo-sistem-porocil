@@ -5,30 +5,41 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
+
 public class Porocilo {
-    private HashMap<Integer,ArrayList<String>> zapisi;
+    private HashMap<Integer,ArrayList<Zapis>> zapisi;
+    private HashMap <Integer, Integer> trenutnoOsebVProstorih;
 
     public Porocilo() {
-        this.zapisi = new HashMap<Integer,ArrayList<String>>();
+        this.zapisi = new HashMap<Integer,ArrayList<Zapis>>();
     }
 
-    public HashMap<Integer,ArrayList<String>> getZapisi() { return zapisi; }
+    public HashMap<Integer,ArrayList<Zapis>> getZapisi() { return zapisi; }
 
-    public void setZapisi(HashMap<Integer,ArrayList<String>> zapisi) { this.zapisi = zapisi; }
+    public void setZapisi(HashMap<Integer,ArrayList<Zapis>> zapisi) { this.zapisi = zapisi; }
 
-    public String addZapis(int prostorId, int vrataId){
+    public Zapis addZapis(int prostorId, int vrataId, int stVstopov, int stIzstopov){
         LocalDateTime cas = LocalDateTime.now();
-        StringBuilder sb = new StringBuilder();
+        
+        Zapis noviZapis = new Zapis();
+        noviZapis.setCas(cas);
+        noviZapis.setProstorId(prostorId);
+        noviZapis.setVrataId(vrataId);
+        noviZapis.setStVstopov(stVstopov);
+        noviZapis.setStIzstopov(stIzstopov);
 
-        sb.append("Vrata: " + vrataId + ", ");
-        int min = cas.getMinute();
-        String minStr = (min > 10) ? Integer.toString(min) : "0"+Integer.toString(min);
 
-        sb.append(cas.getHour()+":"+minStr+" " +cas.getDayOfWeek() + " "+cas.getDayOfMonth()+" "+cas.getMonth()+ " "+cas.getYear());
+        if (trenutnoOsebVProstorih==null) trenutnoOsebVProstorih = new HashMap <Integer, Integer>();
+        Integer novo = stVstopov-stIzstopov;
+        if (trenutnoOsebVProstorih.get(prostorId)!=null)
+        novo = trenutnoOsebVProstorih.get(prostorId)+stVstopov-stIzstopov;
+        if (novo<0) novo = 0;
+        trenutnoOsebVProstorih.put(prostorId,novo);
+        noviZapis.setTrenutnoOseb(novo);
 
-        String noviZapis = sb.toString();
-        ArrayList<String> trenutniZapisi = this.zapisi.get(prostorId);
-        if (trenutniZapisi==null) trenutniZapisi = new ArrayList<String>();
+
+        ArrayList<Zapis> trenutniZapisi = this.zapisi.get(prostorId);
+        if (trenutniZapisi==null) trenutniZapisi = new ArrayList<Zapis>();
         trenutniZapisi.add(noviZapis);
         this.zapisi.put(prostorId,trenutniZapisi);
         return noviZapis;

@@ -5,8 +5,8 @@ import java.time.LocalDateTime;
 public class Zapis {
     private Integer prostorId;
     private Integer vrataId;
-    private Integer stVstopov;
-    private Integer stIzstopov;
+    private Integer vstopov;
+    private Integer izstopov;
     private Integer trenutnoOseb;
     private LocalDateTime cas;
 
@@ -34,20 +34,20 @@ public class Zapis {
         this.vrataId = vrataId;
     }
 
-    public Integer getStVstopov() {
-        return stVstopov;
+    public Integer getVstopov() {
+        return vstopov;
     }
 
-    public void setStVstopov(Integer stVstopov) {
-        this.stVstopov = stVstopov;
+    public void setVstopov(Integer vstopov) {
+        this.vstopov = vstopov;
     }
 
-    public Integer getStIzstopov() {
-        return stIzstopov;
+    public Integer getIzstopov() {
+        return izstopov;
     }
 
-    public void setStIzstopov(Integer stIzstopov) {
-        this.stIzstopov = stIzstopov;
+    public void setIzstopov(Integer izstopov) {
+        this.izstopov = izstopov;
     }
 
     public Integer getTrenutnoOseb() {
@@ -70,8 +70,8 @@ public class Zapis {
     public String toString() {
         return  "Prostor: " + prostorId +
                 ", Vrata: " + vrataId +
-                ", vstopov=" + stVstopov +
-                ", izstopov=" + stIzstopov +
+                ", vstopov=" + vstopov +
+                ", izstopov=" + izstopov +
                 ", trenutnoOseb=" + trenutnoOseb +
                 ", " + pretvori(cas) +
                 '}';

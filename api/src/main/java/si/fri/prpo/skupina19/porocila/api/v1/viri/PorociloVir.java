@@ -8,7 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.time.LocalDateTime;
+import java.util.HashMap;
 
 @ApplicationScoped
 @Path("porocila")
@@ -21,12 +21,6 @@ public class PorociloVir {
     @PostConstruct
     private void init() {
         porocilo = new Porocilo();
-        porocilo.addZapis(2,1, 5, 1);
-        porocilo.addZapis(1,1,1, 1);
-        porocilo.addZapis(1,2,2, 1);
-        porocilo.addZapis(1,3,3, 1);
-        porocilo.addZapis(1,3,0, 3);
-        //System.out.println(porocilo.toString());
     }
 
     @GET
@@ -38,9 +32,8 @@ public class PorociloVir {
     }
 
     @POST
-    @Path("/{prostorId}/{vrataId}&{stVstopov}&{stIzstopov}")
-    public Response createZapis(@PathParam("prostorId") Integer prostorId, @PathParam("vrataId") Integer vrataId, @PathParam("stVstopov") Integer stVstopov, @PathParam("stIzstopov") Integer stIzstopov) {
-        Zapis noviZapis = porocilo.addZapis(prostorId, vrataId, stVstopov, stIzstopov);
+    public Response createZapis(HashMap <String, Integer> h) {
+        Zapis noviZapis = porocilo.addZapis(h.get("prostorId"), h.get("vrataId"), h.get("vstopov"), h.get("izstopov"), h.get("trenutnoOseb"));
         if (porocilo == null) {
             return Response
                     .status(Response.Status.BAD_REQUEST).build();

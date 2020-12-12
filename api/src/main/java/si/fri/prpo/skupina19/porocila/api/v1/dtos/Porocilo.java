@@ -4,11 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-
-
 public class Porocilo {
     private HashMap<Integer,ArrayList<Zapis>> zapisi;
-    private HashMap <Integer, Integer> trenutnoOsebVProstorih;
 
     public Porocilo() {
         this.zapisi = new HashMap<Integer,ArrayList<Zapis>>();
@@ -18,25 +15,19 @@ public class Porocilo {
 
     public void setZapisi(HashMap<Integer,ArrayList<Zapis>> zapisi) { this.zapisi = zapisi; }
 
-    public Zapis addZapis(int prostorId, int vrataId, int stVstopov, int stIzstopov){
+    public Zapis addZapis(int prostorId, int vrataId, int vstopov, int izstopov, int trenutnoOseb){
         LocalDateTime cas = LocalDateTime.now();
         
         Zapis noviZapis = new Zapis();
         noviZapis.setCas(cas);
         noviZapis.setProstorId(prostorId);
         noviZapis.setVrataId(vrataId);
-        noviZapis.setStVstopov(stVstopov);
-        noviZapis.setStIzstopov(stIzstopov);
+        noviZapis.setVstopov(vstopov);
+        noviZapis.setIzstopov(izstopov);
 
-
-        if (trenutnoOsebVProstorih==null) trenutnoOsebVProstorih = new HashMap <Integer, Integer>();
-        Integer novo = stVstopov-stIzstopov;
-        if (trenutnoOsebVProstorih.get(prostorId)!=null)
-        novo = trenutnoOsebVProstorih.get(prostorId)+stVstopov-stIzstopov;
+        Integer novo = trenutnoOseb+vstopov-izstopov;
         if (novo<0) novo = 0;
-        trenutnoOsebVProstorih.put(prostorId,novo);
         noviZapis.setTrenutnoOseb(novo);
-
 
         ArrayList<Zapis> trenutniZapisi = this.zapisi.get(prostorId);
         if (trenutniZapisi==null) trenutniZapisi = new ArrayList<Zapis>();

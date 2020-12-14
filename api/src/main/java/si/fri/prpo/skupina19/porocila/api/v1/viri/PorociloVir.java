@@ -8,6 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 @ApplicationScoped
@@ -29,6 +30,31 @@ public class PorociloVir {
             return Response .ok(porocilo).build();
         else
             return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    @GET
+    @Path("{prostorId}")
+    public Response getNajboljPopularnaVrata (@PathParam("prostorId") Integer prostorId){
+        ArrayList<Zapis> zapisiProstora = porocilo.getZapisi().get(prostorId);
+        HashMap<Integer,Integer> vstopiVrat = new HashMap<Integer,Integer>();
+        Integer max = 0;
+        Integer iskanaVrata = -1;
+        for (int i=0;i<zapisiProstora.size();i++){
+            Integer vrataId = zapisiProstora.get(i).getVrataId();
+            Integer vstopov = zapisiProstora.get(i).getVstopov();
+            Integer tr = vstopiVrat.get(vrataId);
+            Integer novo = vstopov;
+            if (tr==null) vstopiVrat.put(vrataId,novo);
+            else novo = tr+vstopov;
+            if (novo>max){
+                iskanaVrata = vrataId;
+                max = novo;
+            }
+            vstopiVrat.put(vrataId,novo);
+        }
+        if (iskanaVrata!=-1)
+            return Response.status(Response.Status.OK).entity("Najbolj popularna vrata so " + iskanaVrata +" in imajo skupno " + max + "vstopov").build();
+        else return Response.status(Response.Status.NOT_FOUND).entity("Ni vstopov v izbranem prostoru!").build();
     }
 
     @POST

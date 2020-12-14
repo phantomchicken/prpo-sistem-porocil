@@ -10,6 +10,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.lang.Double;
 
 @ApplicationScoped
 @Path("porocila")
@@ -22,6 +23,12 @@ public class PorociloVir {
     @PostConstruct
     private void init() {
         porocilo = new Porocilo();
+        porocilo.addZapis(3,1,5,1,0);
+        porocilo.addZapis(3,2,6,2,4);
+        porocilo.addZapis(3,3,2,4,2);
+        porocilo.addZapis(3,4,0,1,1);
+        porocilo.addZapis(3,4,2,2,0);
+
     }
 
     @GET
@@ -59,21 +66,37 @@ public class PorociloVir {
 
     @GET
     @Path("{prostorId}/{dan}")
-    public void getSteviloObiskovalcevVDanu (@PathParam("prostorId") Integer prostorId, @PathParam("dan") String dan){
+    public Response getSteviloObiskovalcevVDanu (@PathParam("prostorId") Integer prostorId, @PathParam("dan") String dan){
         ArrayList<Zapis> zapisiProstora = porocilo.getZapisi().get(prostorId);
         HashMap<String, Integer> trenutnoStevilo = new HashMap<String, Integer>();
         HashMap<String, Integer> steviloPosameznegaDneva = new HashMap<String, Integer>();
+        HashMap<String, Double> rezultat = new HashMap<String, Double>();
 
         for (int i = 0; i < zapisiProstora.size(); i++){
             String danZapisa = zapisiProstora.get(i).getCas().getDayOfWeek().toString();
             Integer stObiskovalcev = zapisiProstora.get(i).getVstopov();
-            trenutnoStevilo.put(danZapisa, trenutnoStevilo.get(danZapisa)+ stObiskovalcev);
-            steviloPosameznegaDneva.put(danZapisa, steviloPosameznegaDneva.get(danZapisa)+1);
+            if (trenutnoStevilo.get(danZapisa) != null)
+                trenutnoStevilo.put(danZapisa, trenutnoStevilo.get(danZapisa)+ stObiskovalcev);
+            else
+                trenutnoStevilo.put(danZapisa, stObiskovalcev);
+
+            if (steviloPosameznegaDneva.get(danZapisa) != null)
+                steviloPosameznegaDneva.put(danZapisa, steviloPosameznegaDneva.get(danZapisa)+1);
+            else
+                steviloPosameznegaDneva.put(danZapisa, 1);
         }
 
         steviloPosameznegaDneva.forEach((k, v) -> {
-            System.out.format("key: %s, value: %d%n", k, v);
+            //System.out.format("key: %s, value: %d%n", k, v);
+            rezultat.put(k, trenutnoStevilo.get(k).doubleValue()/v.doubleValue());
         });
+
+        trenutnoStevilo.forEach((k, v) -> {
+            System.out.format("key: %s, value: %d%n", k, v);
+            //trenutnoStevilo.put(k, trenutnoStevilo.get(k)/v);
+        });
+
+        return Response.status(Response.Status.OK).entity(rezultat).build();
 
     }
 

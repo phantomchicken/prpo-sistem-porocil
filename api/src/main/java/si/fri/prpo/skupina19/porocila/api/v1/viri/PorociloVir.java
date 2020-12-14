@@ -57,6 +57,26 @@ public class PorociloVir {
         else return Response.status(Response.Status.NOT_FOUND).entity("Ni vstopov v izbranem prostoru!").build();
     }
 
+    @GET
+    @Path("{prostorId}/{dan}")
+    public void getSteviloObiskovalcevVDanu (@PathParam("prostorId") Integer prostorId, @PathParam("dan") String dan){
+        ArrayList<Zapis> zapisiProstora = porocilo.getZapisi().get(prostorId);
+        HashMap<String, Integer> trenutnoStevilo = new HashMap<String, Integer>();
+        HashMap<String, Integer> steviloPosameznegaDneva = new HashMap<String, Integer>();
+
+        for (int i = 0; i < zapisiProstora.size(); i++){
+            String danZapisa = zapisiProstora.get(i).getCas().getDayOfWeek().toString();
+            Integer stObiskovalcev = zapisiProstora.get(i).getVstopov();
+            trenutnoStevilo.put(danZapisa, trenutnoStevilo.get(danZapisa)+ stObiskovalcev);
+            steviloPosameznegaDneva.put(danZapisa, steviloPosameznegaDneva.get(danZapisa)+1);
+        }
+
+        steviloPosameznegaDneva.forEach((k, v) -> {
+            System.out.format("key: %s, value: %d%n", k, v);
+        });
+
+    }
+
     @POST
     public Response createZapis(HashMap <String, Integer> h) {
         Zapis noviZapis = porocilo.addZapis(h.get("prostorId"), h.get("vrataId"), h.get("vstopov"), h.get("izstopov"), h.get("trenutnoOseb"));

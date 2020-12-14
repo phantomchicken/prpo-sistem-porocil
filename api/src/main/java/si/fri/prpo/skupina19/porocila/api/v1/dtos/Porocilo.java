@@ -36,6 +36,27 @@ public class Porocilo {
         return noviZapis;
     }
 
+    public Zapis addZapisDan(int prostorId, int vrataId, int vstopov, int izstopov, int trenutnoOseb, int dan){
+        LocalDateTime cas = LocalDateTime.of(2020,12,dan,23,59);
+
+        Zapis noviZapis = new Zapis();
+        noviZapis.setCas(cas);
+        noviZapis.setProstorId(prostorId);
+        noviZapis.setVrataId(vrataId);
+        noviZapis.setVstopov(vstopov);
+        noviZapis.setIzstopov(izstopov);
+
+        Integer novo = trenutnoOseb+vstopov-izstopov;
+        if (novo<0) novo = 0;
+        noviZapis.setTrenutnoOseb(novo);
+
+        ArrayList<Zapis> trenutniZapisi = this.zapisi.get(prostorId);
+        if (trenutniZapisi==null) trenutniZapisi = new ArrayList<Zapis>();
+        trenutniZapisi.add(noviZapis);
+        this.zapisi.put(prostorId,trenutniZapisi);
+        return noviZapis;
+    }
+
     @Override
     public String toString (){
         if (zapisi==null) return "";

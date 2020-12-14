@@ -23,12 +23,11 @@ public class PorociloVir {
     @PostConstruct
     private void init() {
         porocilo = new Porocilo();
-        porocilo.addZapis(3,1,5,1,0);
-        porocilo.addZapis(3,2,6,2,4);
-        porocilo.addZapis(3,3,2,4,2);
-        porocilo.addZapis(3,4,0,1,1);
-        porocilo.addZapis(3,4,2,2,0);
-
+        porocilo.addZapisDan(3,1,5,1,0,1);
+        porocilo.addZapisDan(3,2,6,2,4,2);
+        porocilo.addZapisDan(3,3,2,4,2,3);
+        porocilo.addZapisDan(3,4,0,1,1,4);
+        porocilo.addZapisDan(3,4,2,2,0,5);
     }
 
     @GET

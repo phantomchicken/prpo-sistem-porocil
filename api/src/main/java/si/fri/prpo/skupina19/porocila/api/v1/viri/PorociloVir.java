@@ -24,10 +24,14 @@ public class PorociloVir {
     private void init() {
         porocilo = new Porocilo();
         porocilo.addZapisDan(3,1,5,1,0,1);
+        porocilo.addZapisDan(3,1,3,1,0,1);
+        porocilo.addZapisDan(3,1,1,1,0,1);
         porocilo.addZapisDan(3,2,6,2,4,2);
         porocilo.addZapisDan(3,3,2,4,2,3);
         porocilo.addZapisDan(3,4,0,1,1,4);
         porocilo.addZapisDan(3,4,2,2,0,5);
+        porocilo.addZapisDan(3,4,3,2,0,5);
+        porocilo.addZapisDan(3,4,7,2,0,5);
     }
 
     @GET
@@ -64,8 +68,8 @@ public class PorociloVir {
     }
 
     @GET
-    @Path("{prostorId}/{dan}")
-    public Response getSteviloObiskovalcevVDanu (@PathParam("prostorId") Integer prostorId, @PathParam("dan") String dan){
+    @Path("{prostorId}/stevilo-obiskovalcev")
+    public Response getSteviloObiskovalcevVDanu (@PathParam("prostorId") Integer prostorId){
         ArrayList<Zapis> zapisiProstora = porocilo.getZapisi().get(prostorId);
         HashMap<String, Integer> trenutnoStevilo = new HashMap<String, Integer>();
         HashMap<String, Integer> steviloPosameznegaDneva = new HashMap<String, Integer>();
@@ -90,10 +94,10 @@ public class PorociloVir {
             rezultat.put(k, trenutnoStevilo.get(k).doubleValue()/v.doubleValue());
         });
 
-        trenutnoStevilo.forEach((k, v) -> {
-            System.out.format("key: %s, value: %d%n", k, v);
+        //trenutnoStevilo.forEach((k, v) -> {
+        //    System.out.format("key: %s, value: %d%n", k, v);
             //trenutnoStevilo.put(k, trenutnoStevilo.get(k)/v);
-        });
+        //});
 
         return Response.status(Response.Status.OK).entity(rezultat).build();
 

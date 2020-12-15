@@ -31,9 +31,29 @@ public class PorociloVir {
     }
 
     @GET
-    public Response getPorocila (){
-        if (porocilo!=null)
-            return Response .ok(porocilo).build();
+    @Path("{prostorId}")
+    public Response getPodrobnoPorocilo (@PathParam("prostorId") Integer prostorId){
+        ArrayList<Object> porocilo = new ArrayList<Object>();
+        Object najVrata = getNajboljPopularnaVrata(prostorId).getEntity();
+        Response priliviResp = getPrilivPoVratih(prostorId);
+        Object prilivi = priliviResp.getEntity();
+        Object maxMinVrata = priliviResp.getHeaders();
+        Object dnevi = getSteviloObiskovalcevPoDanu(prostorId).getEntity();
+
+        porocilo.add("Porocilo za prostor: " + prostorId);
+        porocilo.add(najVrata);
+        porocilo.add("Prilivi po vratih");
+        porocilo.add(prilivi);
+        porocilo.add(maxMinVrata);
+        porocilo.add("Povprecni vstopi po dnevih");
+        porocilo.add(dnevi);
+        return Response.status(Response.Status.OK).entity(porocilo).build();
+    }
+
+    @GET
+    public Response getZapisi (){
+        if (porocilo.getZapisi()!=null)
+            return Response .ok(porocilo.getZapisi()).build();
         else
             return Response.status(Response.Status.NOT_FOUND).build();
     }
@@ -45,7 +65,7 @@ public class PorociloVir {
         HashMap<Integer,Integer> vstopiVrat = new HashMap<Integer,Integer>();
         Integer max = 0;
         Integer iskanaVrata = -1;
-        if (zapisiProstora == null) return Response.status(Response.Status.NOT_FOUND).build();
+        if (zapisiProstora == null) return Response.status(Response.Status.NOT_FOUND).entity("Ni zapisov v izbranem prostoru!").build();
         for (int i=0;i<zapisiProstora.size();i++){
             Integer vrataId = zapisiProstora.get(i).getVrataId();
             Integer vstopov = zapisiProstora.get(i).getVstopov();
@@ -66,12 +86,12 @@ public class PorociloVir {
 
     @GET
     @Path("{prostorId}/povprecje")
-    public Response getSteviloObiskovalcevVDanu (@PathParam("prostorId") Integer prostorId){
+    public Response getSteviloObiskovalcevPoDanu (@PathParam("prostorId") Integer prostorId){
         ArrayList<Zapis> zapisiProstora = porocilo.getZapisi().get(prostorId);
         HashMap<String, Integer> trenutnoStevilo = new HashMap<String, Integer>();
         HashMap<String, Integer> steviloPosameznegaDneva = new HashMap<String, Integer>();
         HashMap<String, Double> rezultat = new HashMap<String, Double>();
-        if (zapisiProstora == null) return Response.status(Response.Status.NOT_FOUND).build();
+        if (zapisiProstora == null) return Response.status(Response.Status.NOT_FOUND).entity("Ni zapisov v izbranem prostoru!").build();
         for (int i = 0; i < zapisiProstora.size(); i++){
             String danZapisa = zapisiProstora.get(i).getCas().getDayOfWeek().toString();
             Integer stObiskovalcev = zapisiProstora.get(i).getVstopov();
@@ -91,13 +111,9 @@ public class PorociloVir {
             rezultat.put(k, trenutnoStevilo.get(k).doubleValue()/v.doubleValue());
         });
 
-        trenutnoStevilo.forEach((k, v) -> {
-            System.out.format("key: %s, value: %d%n", k, v);
-            //trenutnoStevilo.put(k, trenutnoStevilo.get(k)/v);
-        });
+        //trenutnoStevilo.forEach((k, v) -> {System.out.format("key: %s, value: %d%n", k, v); });
 
         return Response.status(Response.Status.OK).entity(rezultat).build();
-
     }
 
     @GET
@@ -110,7 +126,7 @@ public class PorociloVir {
         Integer maxVrata = -1;
         Integer min = Integer.MAX_VALUE;
         Integer minVrata=-1;
-        if (zapisiProstora == null) return Response.status(Response.Status.NOT_FOUND).build();
+        if (zapisiProstora == null) return Response.status(Response.Status.NOT_FOUND).entity("Ni zapisov v izbranem prostoru!").build();
         for (int i = 0; i < zapisiProstora.size(); i++){
             Integer vrata = zapisiProstora.get(i).getVrataId();
             Integer tr = 0;

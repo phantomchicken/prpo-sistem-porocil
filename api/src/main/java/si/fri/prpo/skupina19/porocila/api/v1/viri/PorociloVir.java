@@ -43,12 +43,13 @@ public class PorociloVir {
     }
 
     @GET
-    @Path("{prostorId}")
+    @Path("{prostorId}/popularna")
     public Response getNajboljPopularnaVrata (@PathParam("prostorId") Integer prostorId){
         ArrayList<Zapis> zapisiProstora = porocilo.getZapisi().get(prostorId);
         HashMap<Integer,Integer> vstopiVrat = new HashMap<Integer,Integer>();
         Integer max = 0;
         Integer iskanaVrata = -1;
+        if (zapisiProstora == null) return Response.status(Response.Status.NOT_FOUND).build();
         for (int i=0;i<zapisiProstora.size();i++){
             Integer vrataId = zapisiProstora.get(i).getVrataId();
             Integer vstopov = zapisiProstora.get(i).getVstopov();
@@ -63,18 +64,18 @@ public class PorociloVir {
             vstopiVrat.put(vrataId,novo);
         }
         if (iskanaVrata!=-1)
-            return Response.status(Response.Status.OK).entity("Najbolj popularna vrata so " + iskanaVrata +" in imajo skupno " + max + "vstopov").build();
+            return Response.status(Response.Status.OK).entity("Najbolj popularna vrata prostora " + prostorId + " so " + iskanaVrata +" in imajo skupno " + max + " vstopov").build();
         else return Response.status(Response.Status.NOT_FOUND).entity("Ni vstopov v izbranem prostoru!").build();
     }
 
     @GET
-    @Path("{prostorId}/stevilo-obiskovalcev")
+    @Path("{prostorId}/povprecje")
     public Response getSteviloObiskovalcevVDanu (@PathParam("prostorId") Integer prostorId){
         ArrayList<Zapis> zapisiProstora = porocilo.getZapisi().get(prostorId);
         HashMap<String, Integer> trenutnoStevilo = new HashMap<String, Integer>();
         HashMap<String, Integer> steviloPosameznegaDneva = new HashMap<String, Integer>();
         HashMap<String, Double> rezultat = new HashMap<String, Double>();
-
+        if (zapisiProstora == null) return Response.status(Response.Status.NOT_FOUND).build();
         for (int i = 0; i < zapisiProstora.size(); i++){
             String danZapisa = zapisiProstora.get(i).getCas().getDayOfWeek().toString();
             Integer stObiskovalcev = zapisiProstora.get(i).getVstopov();
@@ -101,6 +102,36 @@ public class PorociloVir {
 
         return Response.status(Response.Status.OK).entity(rezultat).build();
 
+    }
+
+    @GET
+    @Path("{prostorId}/priliv")
+    public Response getPrilivPoVratih (@PathParam("prostorId") Integer prostorId){
+        ArrayList<Zapis> zapisiProstora = porocilo.getZapisi().get(prostorId);
+        HashMap<Integer, Integer> prilivVrat = new HashMap<Integer, Integer>();
+
+        Integer max = 0;
+        Integer maxVrata = -1;
+        Integer min = Integer.MAX_VALUE;
+        Integer minVrata=-1;
+        if (zapisiProstora == null) return Response.status(Response.Status.NOT_FOUND).build();
+        for (int i = 0; i < zapisiProstora.size(); i++){
+            Integer vrata = zapisiProstora.get(i).getVrataId();
+            Integer tr = 0;
+            if (prilivVrat.get(vrata)!=null) tr = prilivVrat.get(vrata);
+            Integer kumulativa = zapisiProstora.get(i).getVstopov() - zapisiProstora.get(i).getIzstopov();
+            prilivVrat.put(vrata,tr+kumulativa);
+            if (tr+kumulativa > max) {
+                max = tr+kumulativa;
+                maxVrata = vrata;
+            }
+            if (tr+kumulativa < min){
+                min = tr+kumulativa;
+                minVrata = vrata;
+            }
+        }
+
+        return Response.status(Response.Status.OK).header("Vrata z najvecjim prilivom",maxVrata).header("Vrata z najmanjsim prilivom",minVrata).entity(prilivVrat).build();
     }
 
     @POST

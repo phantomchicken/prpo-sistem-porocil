@@ -1,0 +1,13 @@
+docker build . -f Dockerfile --no-cache --pull -t sistem-porocil
+docker run -p 8081:8081 sistem-porocil
+
+ce se zatakne:
+docker images -> docker rmi
+docker ps -a -> docker rm
+
+push: (ze narejeno)
+docker login
+docker tag sistem-porocil doineedaccountsforeverything/sledilnik
+docker push doineedaccountsforeverything/sistem-porocil
+
+Pozor! Pri Toolboxu poizvedbe na 192.168.99.100 npr. GET http://192.168.99.100:8081/v1/porocila/3/2020-12-01

@@ -1,16 +1,25 @@
 package si.fri.prpo.skupina19.porocila.api.v1.viri;
 
+import com.kumuluz.ee.configuration.utils.ConfigurationUtil;
 import si.fri.prpo.skupina19.porocila.api.v1.dtos.Porocilo;
 import si.fri.prpo.skupina19.porocila.api.v1.dtos.Zapis;
+
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.lang.Double;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @Path("porocila")
@@ -20,6 +29,11 @@ public class PorociloVir {
 
     private Porocilo porocilo;
 
+    //@Inject public ApiOdjemalec apiOdjemalec;
+
+    private Client httpClient;
+    private String baseUrl;
+
     @PostConstruct
     private void init() {
         porocilo = new Porocilo();
@@ -28,6 +42,70 @@ public class PorociloVir {
         porocilo.addZapisDan(3,3,2,4,2,3);
         porocilo.addZapisDan(3,4,0,1,1,4);
         porocilo.addZapisDan(3,4,2,2,0,5);
+        httpClient = ClientBuilder.newClient();
+        baseUrl = ConfigurationUtil.getInstance().get("integrations.sistem-porocil.base-url") .orElse("https://covid-193.p.rapidapi.com/history?country=Slovenia&");
+
+    }
+
+    private InputStream covidStatistikaZaDan(LocalDate datum){
+        if (datum!=null){
+            String danString = "day=";
+            danString += datum.getYear() + "-" ;
+            danString += datum.getMonthValue() + "-";
+            if (datum.getDayOfMonth()<10) danString = danString + "0" + datum.getDayOfMonth();
+            else danString += datum.getDayOfMonth();
+            try {
+                Response response = httpClient
+                        .target(baseUrl + danString)
+                        .request(MediaType.APPLICATION_JSON)
+                        .header("x-rapidapi-key","da51fa60c0mshfcda2f7b3f5f246p1522dajsn587f44e89d3e")
+                        .header("x-rapidapi-host","covid-193.p.rapidapi.com")
+                        .get();
+                InputStream o = (InputStream) response.getEntity();
+                return o;
+            } catch(WebApplicationException | ProcessingException e) {
+                throw new InternalServerErrorException(e);
+            }
+        }
+        return null;
+    }
+
+    @GET
+    @Path("{prostorId}/{datum}")
+    public Response vsiVstopiInCovidStatistika(@PathParam("prostorId") Integer prostorId, @PathParam("datum") String datum){
+        ArrayList<Zapis> zapisiProstora = porocilo.getZapisi().get(prostorId);
+        if (zapisiProstora == null) return Response.status(Response.Status.NOT_FOUND).entity("Ni zapisov v izbranem prostoru!").build();
+        if(datum==null) return Response.status(Response.Status.NOT_FOUND).entity("Datum ni podan!").build();
+        String[] datumSplit = datum.split("-");
+        if (datumSplit!=null){
+            String leto = datumSplit[0];
+            String mesec = datumSplit[1];
+            String dan = datumSplit[2];
+            Integer suma = 0;
+            LocalDate datumLd = LocalDate.of(Integer.parseInt(leto),Integer.parseInt(mesec),Integer.parseInt(dan));
+            for (int i=0;i<zapisiProstora.size();i++){
+                LocalDate zapisLd = zapisiProstora.get(i).getCas().toLocalDate();
+                if (datumLd.equals(zapisLd)){
+                    suma+=zapisiProstora.get(i).getVstopov();
+                }
+            }
+            InputStream rezultatAPIKlica = covidStatistikaZaDan(datumLd);
+            if (rezultatAPIKlica==null) {
+                return Response.status(Response.Status.OK).entity("V prostoru " + prostorId +" je dneva " + datum +" bilo " + suma + " vstopov. Zunanjih podatkov ni mogoce pridobiti!").build();
+            }
+            String result = new BufferedReader(new InputStreamReader(rezultatAPIKlica)).lines().parallel().collect(Collectors.joining("\n"));
+            Integer resultCases = result.indexOf("cases");
+            Integer resultTests = result.indexOf("tests");
+            String resultSub = result.substring(resultCases,resultTests);
+            Integer resultDeaths = resultSub.indexOf("deaths");
+            String[] cases = resultSub.substring(0,resultDeaths).split(",");
+            String[] deaths = resultSub.substring(resultDeaths).split(",");
+            Integer newDeaths = Integer.parseInt(deaths[0].substring(deaths[0].indexOf("+")+1,deaths[0].length()-1));
+            Integer newCases = Integer.parseInt(cases[0].substring(cases[0].indexOf("+")+1,cases[0].length()-1));
+            return Response.status(Response.Status.OK).entity("Dne " + datum + " je bilo " + newCases +" novih okuženih, in " + newDeaths + " jih je umrlo. V prostoru " + prostorId +" je bilo " + suma + " vstopov.").build();
+        }
+
+        return Response.status(Response.Status.NOT_FOUND).entity("Datum ni veljaven!").build();
     }
 
     @GET
@@ -40,6 +118,7 @@ public class PorociloVir {
         Object maxMinVrata = priliviResp.getHeaders();
         Object dnevi = getSteviloObiskovalcevPoDanu(prostorId).getEntity();
 
+        //apiOdjemalec.covidStatistikaZaDan();
         porocilo.add("Porocilo za prostor: " + prostorId);
         porocilo.add(najVrata);
         porocilo.add("Prilivi po vratih");

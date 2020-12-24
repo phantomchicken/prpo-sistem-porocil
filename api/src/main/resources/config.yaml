@@ -6,3 +6,6 @@ kumuluzee:
   server:
     http:
       port: 8081
+integrations:
+  sistem-porocil:
+    base-url: https://covid-193.p.rapidapi.com/history?country=Slovenia&

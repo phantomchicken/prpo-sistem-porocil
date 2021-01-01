@@ -7,7 +7,20 @@ docker ps -a -> docker rm
 
 push: (ze narejeno)
 docker login
-docker tag sistem-porocil doineedaccountsforeverything/sledilnik
+docker tag sistem-porocil doineedaccountsforeverything/sistem-porocil
 docker push doineedaccountsforeverything/sistem-porocil
 
 Pozor! Pri Toolboxu poizvedbe na 192.168.99.100 npr. GET http://192.168.99.100:8081/v1/porocila/3/2020-12-01
+
+Kubernetes:
+Azure: connect, skopirati dva ukaza za povezavo
+v k8s mapi: kubectl apply -f sistem-porocil-deployment.yaml
+kubectl get deployments - namesceno?
+kubectl get pods - kateri podi tecejo?
+kubectl get services - katere storitve tecejo?
+kubectl logs <imepoda> (sistem-porocil-deployment-69b76b947f-nbb5f) - izpis konzole, ali se zagnalo pravilno?
+
+kubectl proxy --port=8081
+kubectl exec sistem-porocil-deployment-69b76b947f-nbb5f -i curl http://localhost:8081/v1/porocila
+kubectl exec sistem-porocil-deployment-69b76b947f-nbb5f -i curl http://localhost:8081/v1/porocila/3
+itd.

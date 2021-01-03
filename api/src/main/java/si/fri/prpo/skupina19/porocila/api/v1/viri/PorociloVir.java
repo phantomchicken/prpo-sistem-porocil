@@ -51,7 +51,8 @@ public class PorociloVir {
         if (datum!=null){
             String danString = "day=";
             danString += datum.getYear() + "-" ;
-            danString += datum.getMonthValue() + "-";
+            if (datum.getMonthValue()<10) danString = danString + "0" + datum.getMonthValue() + "-" ;
+            else danString += datum.getMonthValue() + "-" ;
             if (datum.getDayOfMonth()<10) danString = danString + "0" + datum.getDayOfMonth();
             else danString += datum.getDayOfMonth();
             try {
